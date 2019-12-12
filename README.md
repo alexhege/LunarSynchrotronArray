@@ -1,5 +1,7 @@
 # LunarSynchrotronArray
-This is the README for the LunarSynchrotronArray package, maintained by Dr. Alex Hegedus alexhege@umich.edu
+This is the README for the LunarSynchrotronArray package, maintained by Dr. Alex Hegedus alexhege@umich.edu  I am currently a post-doctoral research fellow at University of Michigan looking to branch out and make connections with people interested in designing distributed sensor arrays.
+
+This code repository corresponds to the Hegedus et al. 2019 (in review) Radio Science paper, "Measuring the Earth's Synchrotron Emission from Radiation Belts with a Lunar Near Side Radio Array".  The arxiv link for the paper is https://arxiv.org/abs/1912.04482
 
 This set of codes should guide you through making the figures in the paper, as well as hopefully being accessible enough for changing the code for your own array.  I would encourage you to please reach out to collaborate if that is the case!
 
@@ -25,8 +27,6 @@ https://naif.jpl.nasa.gov/pub/naif/generic_kernels/
 SLDEM2015_128_60S_60N_000_360_FLOAT.IMG for the lunar surface data by LRO LOLA
 Found at
 http://imbrium.mit.edu/DATA/SLDEM2015/GLOBAL/FLOAT_IMG/
-
-
 
 
 Codes within this package in order of use in pipeline:
@@ -71,4 +71,4 @@ It reads in the .dat files of the synchrotron emission maps in the EarthSynchrot
 It uses CASA routines to create a synthetic array using the J2000 data calculated from the SPICE kernel in the previous script.  It then feeds the truth image into the simulated array to create the visibility data and puts it into a Measurement Set (MS) file.  This MS file is the main output of this script.
 
 4.	Run noiseCopies.py
-This file takes the newly created MS file and creates a noiseless image of the recovered emission.  It then adds noise according to the set integration time and SEFD noise level.  Currently makes images for a range of integration times up to 24 hours and over several robust weighting scheme values.  
+This file takes the newly created MS file and creates a noiseless image of the recovered emission.  It then makes copies of the MS file and adds noise according to the set integration time and SEFD noise level.  Currently makes images for a range of integration times up to 24 hours and over several robust weighting scheme values.  
