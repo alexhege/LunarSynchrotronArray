@@ -1,0 +1,18 @@
+
+\begindata
+
+KERNELS_TO_LOAD = ( '/home/alexhege/SPICE/LunarEph/moon_pa_de421_1900-2050.bpc'
+                   '/home/alexhege/SPICE/LunarEph/moon_080317.tf'
+                   '/home/alexhege/SPICE/LunarEph/moon_assoc_me.tf'
+                   '/home/alexhege/SPICE/LunarEph/pck00010.tpc'
+                   '/home/alexhege/SPICE/LunarEph/naif0008.tls'
+                   '/home/alexhege/SPICE/LunarEph/de430.bsp' )
+
+\begintext
+
+Here are the SPICE kernels required for my application
+program.
+
+Note that kernels are loaded in the order listed. Thus we
+need to list the highest priority kernel last.
+End of example furnsh kernel.
