@@ -63,6 +63,7 @@ To run within casa run this command:
 
 or in terminal
 casa --nologger --nologfile --nogui --agg -c LunarEarthPicFreqIntegration.py  -outDir . -correlate True -numSC 1024| tee out.out
+
 nohup casa --nologger --nologfile --nogui --agg -c LunarEarthPicFreqIntegration.py  -outDir . -correlate True -numSC 1024 | tee earth.out &
 
 
