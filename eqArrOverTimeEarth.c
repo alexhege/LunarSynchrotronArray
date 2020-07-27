@@ -128,8 +128,6 @@ int main ()
       //printf ("Moon in J2000 %11.6f , %11.6f , %11.6f \n", lunarPos[0], lunarPos[1], lunarPos[2]);
 
       //find ra dec of sun from moon
-
-      //SpiceDouble lt;
       spkpos_c("SUN", et, "J2000", "NONE", "EARTH", sunPos, &lt);
       vsub_c(sunPos, lunarPos, sunfromMoon);
 
@@ -177,7 +175,7 @@ int main ()
         }
 
 
-        //find angle sun is visibilities
+        //find angle between sun and zenith to see if it's visible
         // solar angle
                   // between the surface normal vector at `spoint' and the
                   // spoint-sun vector.  Units are radians.  The range
@@ -197,21 +195,22 @@ int main ()
 
         //get normal vector to surface, do in J2000
 
-        for(int j=0; j<3; j++){
-          srfpt[0][j] = rectan[j];
-        }
-
-
-        // srfnrm_c( "Ellipsoid", "MOON", et, "MOON_ME", npts, srfpt, normal);
-        //
-        // //convert J2000 coordsys, axes aligned
-        //
-        //
         // for(int j=0; j<3; j++){
-        //   //normal vector in moon me points
-        //   normal1D[j] = normal[0][j];
-        //
+        //   srfpt[0][j] = rectan[j];
         // }
+
+        latrec_c(1737.4 + 0., lon, lat, srfpt[0]);
+
+        srfnrm_c( "Ellipsoid", "MOON", et, "MOON_ME", npts, srfpt, normal);
+
+        //convert J2000 coordsys, axes aligned
+
+
+        for(int j=0; j<3; j++){
+          //normal vector in moon me points
+          normal1D[j] = normal[0][j];
+
+        }
 
         mxv_c(rotate, normal1D, normal1DJ2000);
 
@@ -235,38 +234,6 @@ int main ()
   //save to files
   FILE *file;
 
-
-  // file = fopen("eqXYZ_MoonCentered.txt", "w");
-  // for(int i = 0; i< numsc; i++) {
-  //   for(int j = 0; j < numDates; j++){
-  //     for(int k=0; k < 3; k++){
-  //       fprintf(file, "%11.6f \n", XYZ[i][j][k]);
-  //     }
-  //   }
-  // }
-  // fclose(file);
-  //
-  //
-  // file = fopen("eqNorms.txt", "w");
-  // for(int i = 0; i< numsc; i++) {
-  //   for(int j = 0; j < numDates; j++){
-  //     for(int k=0; k < 3; k++){
-  //       fprintf(file, "%11.6f \n", jNorms[i][j][k]);
-  //     }
-  //   }
-  // }
-  // fclose(file);
-  //
-  //
-  // file = fopen("eqME_XYZ.txt", "w");
-  // for(int i = 0; i< numsc; i++) {
-  //   for(int j = 0; j < numDates; j++){
-  //     for(int k=0; k < 3; k++){
-  //       fprintf(file, "%11.6f \n", jXYZ[i][j][k]);
-  //     }
-  //   }
-  // }
-  // fclose(file);
 
 //xyz in earth centered j2000 vals
   file = fopen("eqXYZ_EarthCentered.txt", "w");
@@ -309,6 +276,42 @@ int main ()
     }
   }
   fclose(file);
+
+
+  // optional values to save
+
+  // file = fopen("eqXYZ_MoonCentered.txt", "w");
+  // for(int i = 0; i< numsc; i++) {
+  //   for(int j = 0; j < numDates; j++){
+  //     for(int k=0; k < 3; k++){
+  //       fprintf(file, "%11.6f \n", XYZ[i][j][k]);
+  //     }
+  //   }
+  // }
+  // fclose(file);
+  //
+  //
+  // file = fopen("eqNorms.txt", "w");
+  // for(int i = 0; i< numsc; i++) {
+  //   for(int j = 0; j < numDates; j++){
+  //     for(int k=0; k < 3; k++){
+  //       fprintf(file, "%11.6f \n", jNorms[i][j][k]);
+  //     }
+  //   }
+  // }
+  // fclose(file);
+  //
+  //
+  // file = fopen("eqME_XYZ.txt", "w");
+  // for(int i = 0; i< numsc; i++) {
+  //   for(int j = 0; j < numDates; j++){
+  //     for(int k=0; k < 3; k++){
+  //       fprintf(file, "%11.6f \n", jXYZ[i][j][k]);
+  //     }
+  //   }
+  // }
+  // fclose(file);
+
 
 
 }
