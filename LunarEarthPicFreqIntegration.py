@@ -82,15 +82,11 @@ import scipy.ndimage.interpolation as spndint
 
 from pylab import *
 
-import ephem
+# import ephem
 import datetime
 
 ################################################################################
 
-
-
-#defien input parameters
-################################################################################
 ##define input options for running the code
 
 def _getParser():
@@ -120,13 +116,10 @@ def _getParser():
                             default = 6, type = int,\
                             help = """ randomly removes sc if less than 6 """ )
 
-    # argParser.add_argument( '-eciConvert', required = False,
-    #                         action='store_true', \
-    #                         help = """ does ECEF to ECI conversion """ )
 
-    # argParser.add_argument( '-startPos', required = False,
-    #                         default = 0, type = int,\
-    #                         help = """ initial index into gps pos files """ )
+    argParser.add_argument( '-startPos', required = False,
+                            default = 0, type = int,\
+                            help = """ initial index into gps pos files """ )
 
     argParser.add_argument( '-angPos', required = False,
                             default = -1, type = int,\
@@ -200,24 +193,25 @@ def arraySim(lunarMS,freqMHz,truthImage, img, Ant_x, Ant_y, Ant_z, args, baselin
     sm.setspwindow(spwname='HF',
                    freq=str(freqMHz)+'MHz',
                    deltafreq='6100Hz', freqresolution='6100Hz', nchannels=1)
-    # Set the feeds to be X Y.  Haven't figured it out.
+    # Set the feeds to be X Y.
     print 'Setting the feed polarization ...'
     sm.setfeed('perfect X Y')
 
-    #
+
     print 'Setting the source ...'
 
-    srcdir = CMEDir #me.direction('J2000', '00h00m00.0s', '00d00m00.0s')
-    sm.setfield(sourcename='CME1', sourcedirection=srcdir); #CMEDir); ##Change
+    srcdir = CMEDir
+    sm.setfield(sourcename='CME1', sourcedirection=srcdir)
 
-    #rday
+
     print 'Setting integration times ...'
     rday1 = 60017.83
     rday1 += 0.1*timestep/60./60./24. #add seconds to day
     newday=me.epoch(rf='UTC',v0=str(rday1)+'d')
-    sm.settimes(integrationtime='.066s',usehourangle=False,referencetime=newday)  #6.6 ms integration per second integration
-    #
-    # Don't bother with autocorrelations
+    #integration time doesn't factor meaningfully since we calculate
+    #different noise levels in a later script noiseCopies.py
+    sm.settimes(integrationtime='.066s',usehourangle=False,referencetime=newday)
+
     sm.setauto(0.0);
     print 'Observing ...'
     sm.observe(sourcename='CME1',
@@ -250,7 +244,7 @@ def arraySim(lunarMS,freqMHz,truthImage, img, Ant_x, Ant_y, Ant_z, args, baselin
     tb.putcol("UVW", baselines2)
 
 
-    #insert man made correlation visibilities here, from time series code NEWWW
+    #insert man made correlation visibilities here, from time series code
 
     print args.correlate
     # correlate = False
@@ -264,11 +258,12 @@ def arraySim(lunarMS,freqMHz,truthImage, img, Ant_x, Ant_y, Ant_z, args, baselin
         res=400
         width = res1*.038 * np.pi/180.
         dres = width/res
-        cell_rad=dres #qa.convert(qa.quantity("1arcmin"),"rad")['value']
+        cell_rad=dres
+        #qa.convert(qa.quantity("1arcmin"),"rad")['value'] # for 1 arcmin
         imSize = res
         print 'res ra dec ', res, ra, dec
         #real world sky width
-        #assuming eash point is armin squared, as in CME code
+        #assuming eash point is armin squared
         c = 3e8
         kwavnum = 2*np.pi*freq
         wavelen = c/freq
@@ -276,11 +271,11 @@ def arraySim(lunarMS,freqMHz,truthImage, img, Ant_x, Ant_y, Ant_z, args, baselin
         #calculate width of each pixel
         dres = width/res
 
-        #make cs here to get ra decscs=ia.coordsys()
+        #make cs here
         ia.fromshape('temp.truth',shape=[res,res,1,1],overwrite=True)
         cs=ia.coordsys()
         cs.setunits(['rad','rad','','Hz'])
-        arcminDiv = 2.28 * 400/float(400)
+        arcminDiv = 2.28 * 400/float(400) #from resolution of truth images
         cell_rad=qa.convert(qa.quantity(str(arcminDiv)+"arcmin"),"rad")['value']
         cs.setincrement([-cell_rad,cell_rad],'direction')
         cs.setreferencevalue([CMEDir['m0']['value'], CMEDir['m1']['value']],
@@ -485,60 +480,6 @@ def CMEConcatModel(inputMS, outlunarMS):
 
 def imageForm(filename, truthImage, freq, dataArr):
 
-    # img = plimg.imread(filename).astype(np.float32)
-    # dims = np.shape(img)
-    # print 'dims of png is ' + str(dims)
-    # avimg = img
-    # if len(dims) == 2:
-    #     avimg = img
-    #     d1 = float(max(dims))
-    # else:
-    #     d3 = min(3,dims[2])
-    #     d1 = float(max(dims))
-    #     avimg = np.average(img[:,:,:d3],axis=2)
-    #
-    # brightness = 100.*1e4 #total brightness in Jy, Winter et al, sfu is 1e4 Jy
-    # imSize = 400
-    #
-    # avimg -= np.min(avimg)
-    # avimg *= brightness/np.max(avimg)
-    #
-    # zoomimg = spndint.zoom(avimg,float(imSize)/d1)
-    # zdims = np.shape(zoomimg)
-    #
-    # for i in range(zdims[0]):
-    #     for j in range(zdims[1]):
-    #         if zoomimg[i][j] < 0.0:
-    #             zoomimg[i][j] = 0.0
-    #
-    # zoomimg -= np.min(zoomimg)
-    # zoomimg *= brightness/np.max(zoomimg)
-    #
-    #
-    # if zdims[0] != zdims[1]:
-    #     newarr = np.zeros((imSize, imSize))
-    #     d2 = min(zdims)
-    #     if zdims[0] == d2:
-    #         for i in range(d2):
-    #             newarr[imSize/2 - d2/2 + i][:] = zoomimg[i][:]
-    #     elif zdims[1] == d2:
-    #         for i in range(d2):
-    #             newarr[:][imSize/2 - d2/2 + i] = zoomimg[:][i]
-    #     zoomimg = newarr
-    #
-    # z = zoomimg.copy().T
-    # z= np.fliplr(z)  #these operations flip to CASA style of storing data
-    # #which starts at lower left corner, and goes up by columns left to right
-    #
-    #
-    # casaArr = z.reshape((imSize, imSize, 1, 1))
-    #
-    # #renormalize so brighness is entire brightness in JY of all combined
-    #
-    # sumCasaArr = float(sum(casaArr))
-    #
-    # casaArr = casaArr/sumCasaArr*brightness
-
     brightness = sum(dataArr)
 
     print 'tot brightness is ' + str(brightness)
@@ -572,15 +513,6 @@ def imageForm(filename, truthImage, freq, dataArr):
 
     ia.fromarray(truthImage, pixels=casaArr, overwrite=True)
 
-    #simple point src test
-    # ia.fromshape(imageName,shape=[imSize,imSize,1,1],overwrite=True)
-    # delta2 = qa.toangle(str(1)+'deg')
-    # offangle2 = qa.toangle(str(45)+'deg')
-    # NewDir2 = me.shift(phaseCenter, offset=delta2, pa=offangle2)
-    # cl.addcomponent(dir=NewDir2, flux=7e9, fluxunit='Jy', freq=freq, shape='point')
-    # cl.addcomponent(dir=NewDir2,
-    #                 flux=1e10, fluxunit='Jy', freq=freq,
-    #                 shape="Gaussian", majoraxis=qa.toangle(str(2)+'deg'), minoraxis=qa.toangle(str(1)+'deg'), positionangle=qa.toangle(str(45)+'deg'))
 
     cs=ia.coordsys()
     cs.setunits(['rad','rad','','Hz'])
@@ -613,9 +545,6 @@ def imageForm(filename, truthImage, freq, dataArr):
     ia.setcoordsys(cs.torecord())
     ia.setbrightnessunit("Jy/pixel")
 
-    # ia.modify(cl.torecord(),subtract=False)
-
-
     pix = ia.getchunk()
     pix = pix.reshape((imSize, imSize))
 
@@ -636,7 +565,7 @@ if __name__ == "__main__":
     """
 
     import argparse
-    ##define the input argument, only need numSC?
+    ##define the input argument, only need numSC currently
     args = _getParser()
 
 
@@ -684,9 +613,8 @@ if __name__ == "__main__":
     srcdir = [px, py, pz]
     length = 1
 
-    # phasescpos, phasescerr, allscpos = getCoordinates(timestart, timeend, length, args, srcdir)
-
-    phasescpos = xyzs[:,0,:]
+    #use argument startPos, defaults to 0 in not in command line
+    phasescpos = xyzs[:,args.startPos,:]
 
     phasescpos = np.expand_dims(phasescpos, axis=1)
     allscpos = phasescpos.copy()
@@ -789,9 +717,6 @@ if __name__ == "__main__":
         for j in range(400):
             data[j,:] = map(float, ls[j].split(','))
 
-        #fix bug, Quentin said to do this in email
-        #cancel that, these dat files already were fixed
-        # data = data*4.
         print truthImage
         cl.done()
         qa.done()
@@ -801,8 +726,8 @@ if __name__ == "__main__":
         countForm = countForm +1
 
         outfile=os.path.join('.', truthImage.strip('truth')+'jpg')
-	#if the truth image already exists remove it
 
+        #if the truth image already exists remove it
         if os.path.exists(outfile):
             os.remove(outfile)
         viewer(infile=truthImage,displaytype='raster',
@@ -816,18 +741,17 @@ if __name__ == "__main__":
     inputMS = []
     freq=[]
 
-    for f in range(1):#len(freqChans)): ###range(1):
-        ## antenna positions in m
+    for f in range(1): #currently only using 1 frequency band, may expand later
 
         a,b = 14# only choosing 0.7356 MHz, although turned out .76 with this selection
 
 
         #Always referece same antenna locations in sm.setconfig to allow MS consistency after we swap stuff later on
-        Ant_x = phasescpos[:,0,0] #[xs1[0], xs2[0], xs3[0], xs4[0], xs5[0], xs6[0]] # phasescpos[:,0,0]
-        Ant_y = phasescpos[:,0,1] #[ys1[0], ys2[0], ys3[0], ys4[0], ys5[0], ys6[0]]
-        Ant_z = phasescpos[:,0,2] #[zs1[0], zs2[0], zs3[0], zs4[0], zs5[0], zs6[0]]
+        Ant_x = phasescpos[:,0,0]
+        Ant_y = phasescpos[:,0,1]
+        Ant_z = phasescpos[:,0,2]
 
-        truthImage = truthImages[a]#'CME-%06.3fMHz.truth'%(components[i,0])
+        truthImage = truthImages[a]
 
         ia.open(truthImage)
         ia.fft(amp=truthImage + 'Amp.im', phase=truthImage + 'Phase.im')
@@ -847,12 +771,12 @@ if __name__ == "__main__":
 
             counter = 0
             #not changing baselines within our 1 day averaging, so only one set of baselines/visibilities necessary
-            for i in range(1): #4, 5):#8):#len(components)):
+            for i in range(1):
 
 
                 print 'tic freq'
 
-                freqs24ind = 12 #(a - 12)*8 -1 # + i #hacky way to do 8 channels for last 3 freqs, .5, .75, 1.0 MHz;; 13 is first of last 3
+                freqs24ind = 12
 
                 sm.close()
                 me.done()
@@ -881,18 +805,14 @@ if __name__ == "__main__":
     #print inputMS
     #if the concatenated file exists remove it
     outlunarMS = 'EarthSynch_CONCAT_%sMHz_%d_timestep.ms'%(str(freqVal),length)
-    #outlunarMScopy = 'CME_CONCAT_%sMHz_%dsec_control.ms'%(str(freqVal), antPos[i,0])
     if os.path.exists(outlunarMS):
         shutil.rmtree(outlunarMS)
 
 
     CMEConcatModel(inputMS, outlunarMS)
 
-
-
-    #CMEConcatModel(inputMS, outlunarMScopy)
     print 'entering uvmodelfit'
-    #just does cleaning in this call
+    #just does basic cleaning in this call
     CMEuvmodelfit(outlunarMS, args, truth=False, truthim = truthImage, zBLErrs = zBLErrs[:,l], largestBL = bigBL, index = l, chanGroup = 0, concatHz = freqVal*1e6)
     print 'exiting uvm'
     trueErrs = (zErrs - zErrs[0])/(3e8)
@@ -918,7 +838,7 @@ if __name__ == "__main__":
 
     np.savetxt('UVWDataEarth.out', uvws)
     np.savetxt('UVNormEarth.out', uvNorms)
-    #just do uvws = loadtxt('')
 
+    #optional, make fourier component plots of truth images
     #ia.open('EarthSynch-01.000MHz.truth')
     #ia.fft(amp='amp1.im', phase='p1.im')

@@ -83,7 +83,7 @@ import scipy.ndimage.interpolation as spndint
 
 from pylab import *
 
-import ephem
+# import ephem
 import datetime
 
 ################################################################################
