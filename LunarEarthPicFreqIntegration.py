@@ -814,7 +814,7 @@ if __name__ == "__main__":
 
     print 'entering uvmodelfit'
     #just does basic cleaning in this call
-    CMEuvmodelfit(outlunarMS, args, truth=False, truthim = truthImage, zBLErrs = zBLErrs[:,l], largestBL = bigBL, index = l, chanGroup = 0, concatHz = freqVal*1e6)
+    #CMEuvmodelfit(outlunarMS, args, truth=False, truthim = truthImage, zBLErrs = zBLErrs[:,l], largestBL = bigBL, index = l, chanGroup = 0, concatHz = freqVal*1e6)
     print 'exiting uvm'
     trueErrs = (zErrs - zErrs[0])/(3e8)
     print 'true delays are ' + str(trueErrs)
