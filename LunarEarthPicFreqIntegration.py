@@ -744,7 +744,7 @@ if __name__ == "__main__":
 
     for f in range(1): #currently only using 1 frequency band, may expand later
 
-        a,b = 14# only choosing 0.7356 MHz, although turned out .76 with this selection
+        a = 14# only choosing 0.7356 MHz, although turned out .76 with this selection
 
 
         #Always referece same antenna locations in sm.setconfig to allow MS consistency after we swap stuff later on
